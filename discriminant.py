@@ -65,3 +65,9 @@ if __name__ == "__main__":
         
     except ValueError as e:
         print(f"Error: {e}")
+#Ошибка
+# Нарушения стиля для flake8
+def   bad_function  (  )  :       # Лишние пробелы
+    x=1  # Нет пробелов вокруг =
+    very_long_variable_name_that_is_way_too_long_and_violates_pep8_guidelines = 1  # Слишком длинная строка
+    print("hello")# Нет пробела после #
