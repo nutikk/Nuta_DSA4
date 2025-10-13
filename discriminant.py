@@ -66,9 +66,12 @@ if __name__ == "__main__":
     except ValueError as e:
         print(f"Error: {e}")
 #Ошибка
-# Нарушения для flake8
-def   bad_function  (  )  :       # Лишние пробелы
-    x=1  # Нет пробелов вокруг =
-    very_long_variable_name_that_is_way_too_long_and_violates_pep8_guidelines = 1  # Слишком длинная строка
-    print("hello")# Нет пробела после #
-    unused_variable = 123  # Неиспользуемая переменная
+def bad_function():
+x=1  # Ошибка: нет отступов!
+print("no indent")  # Тоже нет отступа!
+
+very_long_variable_name_that_is_way_too_long_and_violates_pep8_guidelines_so_much = 1  # Слишком длинная строка
+
+def another_bad_function(  x , y  ):  # Лишние пробелы
+    unused = 123  # Неиспользуемая переменная
+    return True
