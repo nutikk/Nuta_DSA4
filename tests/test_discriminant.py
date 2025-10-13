@@ -37,12 +37,10 @@ class TestDiscriminant(unittest.TestCase):
         """Test with invalid coefficient a = 0."""
         with self.assertRaises(ValueError):
             calculate_discriminant(0, 1, 1)
-            
-    #ОШИБКА
-    def test_failing_test(self):
-    """Этот тест всегда будет падать - 1 не равно 2"""
-    self.assertEqual(1, 2)  # Тест упадет с ошибкой
 
+    #ОШИБКА
+# def test_failing_test(self):
+#     self.assertEqual(1, 2)  # Закомментировали сломанный тест
 
 if __name__ == '__main__':
     unittest.main()
