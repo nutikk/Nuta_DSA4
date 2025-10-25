@@ -4,34 +4,42 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   deploy-release:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Setup Pages
+      uses: actions/configure-pages@v3
+      
     - name: Create version directory
       run: |
-        # Получаем название релиза (например v1.0.0)
         VERSION="${{ github.event.release.tag_name }}"
         echo " Deploying version: $VERSION"
         
-        # Создаем папку для версии
-        mkdir -p dist/$VERSION
+        # Создаем структуру
+        mkdir -p _site/$VERSION
+        cp -r *.html ru/ en/ _site/ || true
+        cp -r *.html ru/ en/ _site/$VERSION/ || true
         
-        # Копируем все файлы сайта в версионную папку
-        cp -r *.html ru/ en/ dist/$VERSION/ || true
+        echo " Version $VERSION prepared"
         
-        # Также копируем в корень (для последней версии)
-        cp -r *.html ru/ en/ dist/ || true
-        
-        echo "✅ Version $VERSION prepared"
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: ./_site
         
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./dist
-        keep_files: true  # ВАЖНО: сохраняем старые версии!  
+      id: deployment
+      uses: actions/deploy-pages@v2
