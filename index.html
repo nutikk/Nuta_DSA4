@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuta DSA - Все версии</title>
+    <style>
+        body { font-family: Arial; margin: 40px; max-width: 800px; }
+        nav { margin: 20px 0; padding: 10px; background: #f5f5f5; }
+        a { color: blue; text-decoration: none; margin-right: 15px; }
+        a:hover { text-decoration: underline; }
+        .version { background: #e7f3ff; padding: 10px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1> Nuta DSA Project</h1>
+    <p>Все версии проекта доступны ниже:</p>
+    
+    <nav>
+        <strong>Навигация:</strong>
+        <a href="ru/">Русская (последняя)</a>
+        <a href="en/">English (latest)</a>
+    </nav>
+
+    <h2> Доступные версии:</h2>
+    
+    <div class="version">
+        <h3> Последняя версия</h3>
+        <a href="./">Главная</a> | 
+        <a href="ru/">Русская</a> | 
+        <a href="en/">English</a>
+    </div>
+    
+    <div class="version">
+        <h3> v1.0.0</h3>
+        <a href="v1.0.0/">Главная v1.0.0</a> | 
+        <a href="v1.0.0/ru/">Русская v1.0.0</a> | 
+        <a href="v1.0.0/en/">English v1.0.0</a>
+    </div>
+
+    <div id="dynamic-versions">
+        <!-- Сюда добавятся другие версии автоматически -->
+    </div>
+
+    <script>
+        // Автоматическое определение доступных версий
+        const versions = ['v1.0.0']; // Можно расширить
+        
+        const container = document.getElementById('dynamic-versions');
+        versions.forEach(version => {
+            if (!window.location.pathname.includes(version)) {
+                container.innerHTML += `
+                    <div class="version">
+                        <h3> ${version}</h3>
+                        <a href="${version}/">Главная ${version}</a> | 
+                        <a href="${version}/ru/">Русская ${version}</a> | 
+                        <a href="${version}/en/">English ${version}</a>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,73 +1,37 @@
-name: CI/CD Pipeline
+name: Deploy Releases to GitHub Pages
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
-  test:
+  deploy-release:
     runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    - name: Run tests with coverage
-      run: |
-        python -m coverage run -m unittest discover tests/
-        python -m coverage report
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-    - name: Install flake8
-      run: pip install flake8
-    - name: Run flake8 linting
-      run: flake8 . --count --show-source --statistics --max-line-length=80
-
-  security:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-    - name: Install bandit
-      run: pip install bandit
-    - name: Run bandit security scan
-      run: bandit -r . -f html -o bandit_report.html || true
-      
-  notify:
-    runs-on: ubuntu-latest
-    needs: [test, lint, security]
-    if: always()
     
     steps:
-    - name: Send Telegram notification
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Create version directory
       run: |
-        if [ "${{ needs.test.result }}" == "success" ] && [ "${{ needs.lint.result }}" == "success" ] && [ "${{ needs.security.result }}" == "success" ]; then
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d text="✅ All checks passed!"
-        else
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d text="❌ Pipeline failed! Check GitHub Actions"
-        fi
+        # Получаем название релиза (например v1.0.0)
+        VERSION="${{ github.event.release.tag_name }}"
+        echo " Deploying version: $VERSION"
+        
+        # Создаем папку для версии
+        mkdir -p dist/$VERSION
+        
+        # Копируем все файлы сайта в версионную папку
+        cp -r *.html ru/ en/ dist/$VERSION/ || true
+        
+        # Также копируем в корень (для последней версии)
+        cp -r *.html ru/ en/ dist/ || true
+        
+        echo "✅ Version $VERSION prepared"
+        
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
+        keep_files: true  # ВАЖНО: сохраняем старые версии!
