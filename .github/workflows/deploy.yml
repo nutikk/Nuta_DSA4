@@ -1,49 +1,61 @@
-name: Deploy to GitHub Pages
+name: Deploy Release to GitHub Pages
 
 on:
-  push:
-    branches: [main]
   release:
     types: [published]
 
 permissions:
-  contents: write
   pages: write
   id-token: write
 
 jobs:
-  deploy:
+  deploy-release:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     
     steps:
-    - name: Checkout
+    - name: Checkout code
       uses: actions/checkout@v4
       
     - name: Setup Pages
       uses: actions/configure-pages@v3
       
-    - name: Create site structure
+    - name: Build application with version
       run: |
-        # Создаем основную структуру
+        # Создаем папку для сборки
         mkdir -p _site
+        
+        # Копируем ВСЕ файлы приложения
         cp -r *.html ru/ en/ _site/
         
-        # Для релизов создаем версионную папку
-        if [[ "${{ github.event_name }}" == "release" ]]; then
-          VERSION="${{ github.event.release.tag_name }}"
-          echo "Creating version: $VERSION"
-          mkdir -p _site/$VERSION
-          cp -r *.html ru/ en/ _site/$VERSION/
-        fi
+        # Создаем версионную папку для релиза
+        VERSION="${{ github.event.release.tag_name }}"
+        echo "Publishing version: $VERSION"
         
-        # Файл для отключения Jekyll
-        touch _site/.nojekyll
-        echo " Site structure created"
+        mkdir -p _site/$VERSION
+        cp -r *.html ru/ en/ _site/$VERSION/
         
-    - name: Upload artifact
+        # Создаем файл с информацией о версии
+        cat > _site/version.json << EOF
+        {
+          "version": "$VERSION",
+          "published_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+          "urls": {
+            "main": "https://nutikk.github.io/Nuta_DSA4/",
+            "russian": "https://nutikk.github.io/Nuta_DSA4/ru/",
+            "english": "https://nutikk.github.io/Nuta_DSA4/en/",
+            "this_version": "https://nutikk.github.io/Nuta_DSA4/$VERSION/",
+            "russian_version": "https://nutikk.github.io/Nuta_DSA4/$VERSION/ru/",
+            "english_version": "https://nutikk.github.io/Nuta_DSA4/$VERSION/en/"
+          }
+        }
+        EOF
+        
+        echo "✅ Application version $VERSION built successfully"
+        
+    - name: Upload to GitHub Pages
       uses: actions/upload-pages-artifact@v2
       with:
         path: ./_site
@@ -51,3 +63,15 @@ jobs:
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v2
+      
+    - name: Verify deployment
+      run: |
+        VERSION="${{ github.event.release.tag_name }}"
+        echo "DEPLOYMENT SUCCESSFUL!"
+        echo "Application published at:"
+        echo "Main: https://nutikk.github.io/Nuta_DSA4/"
+        echo "Version $VERSION: https://nutikk.github.io/Nuta_DSA4/$VERSION/"
+        echo "Russian $VERSION: https://nutikk.github.io/Nuta_DSA4/$VERSION/ru/"
+        echo "English $VERSION: https://nutikk.github.io/Nuta_DSA4/$VERSION/en/"
+        echo ""
+        echo " Deployment time: $(date)"
