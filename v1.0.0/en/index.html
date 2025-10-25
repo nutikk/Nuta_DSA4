@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuta DPA - English Version</title>
+    <style>
+        body { font-family: Arial; margin: 40px; }
+        .version { background: yellow; padding: 5px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <h1>🇺🇸 Nuta DSA - English Version</h1>
+    <div class="version">Version: <span id="version">latest</span></div>
+    
+    <p>This is English version of DSA project.</p>
+    
+    <nav>
+        <a href="../">← Back to Home</a> | 
+        <a href="../ru/">Russian →</a>
+    </nav>
+
+    <script>
+        // Get version from URL
+        const path = window.location.pathname;
+        const match = path.match(/v\d+\.\d+\.\d+/);
+        if (match) {
+            document.getElementById('version').textContent = match[0];
+        }
+    </script>
+</body>
+</html>
