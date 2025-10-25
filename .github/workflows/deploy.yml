@@ -1,45 +1,41 @@
-name: Deploy Releases to GitHub Pages
+name: Deploy to gh-pages Branch
 
 on:
+  push:
+    branches: [ main ]
   release:
     types: [published]
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 jobs:
-  deploy-release:
+  deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    
     steps:
-    - name: Checkout code
+    - name: Checkout
       uses: actions/checkout@v4
       
-    - name: Setup Pages
-      uses: actions/configure-pages@v3
-      
-    - name: Create version directory
+    - name: Create deployment structure
       run: |
-        VERSION="${{ github.event.release.tag_name }}"
-        echo " Deploying version: $VERSION"
+        # Создаем папку для сборки
+        mkdir -p build
         
-        # Создаем структуру
-        mkdir -p _site/$VERSION
-        cp -r *.html ru/ en/ _site/ || true
-        cp -r *.html ru/ en/ _site/$VERSION/ || true
+        # Копируем все файлы сайта
+        cp -r *.html ru/ en/ build/
         
-        echo " Version $VERSION prepared"
+        if [[ "${{ github.event_name }}" == "release" ]]; then
+          VERSION="${{ github.event.release.tag_name }}"
+          echo "Creating version: $VERSION"
+          mkdir -p build/$VERSION
+          cp -r *.html ru/ en/ build/$VERSION/
+        fi
         
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v2
+        # Создаем .nojekyll файл
+        touch build/.nojekyll
+        
+    - name: Deploy to gh-pages
+      uses: peaceiris/actions-gh-pages@v3
       with:
-        path: ./_site
-        
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v2
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./build
+        publish_branch: gh-pages
+        keep_files: true
+        force_orphan: false
